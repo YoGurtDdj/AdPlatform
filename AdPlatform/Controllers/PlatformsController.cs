@@ -5,7 +5,7 @@ namespace AdPlatform.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlatfromsController : ControllerBase
+    public class PlatformsController : ControllerBase
     {
         // GET: api/<PlatfromsController>
         [HttpGet]
@@ -24,18 +24,6 @@ namespace AdPlatform.Controllers
         // POST api/<PlatfromsController>
         [HttpPost]
         public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<PlatfromsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<PlatfromsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
         {
         }
     }
