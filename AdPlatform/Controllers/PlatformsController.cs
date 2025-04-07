@@ -1,6 +1,6 @@
 ﻿using AdPlatform.Data;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
+using System;
 
 namespace AdPlatform.Controllers
 {
@@ -8,21 +8,21 @@ namespace AdPlatform.Controllers
     [ApiController]
     public class PlatformsController : ControllerBase
     {
-        // GET: api/<PlatfromsController>
         [HttpGet]
         public IEnumerable<Platform> Get()
         {
             return Storage.Platforms;
         }
 
-        // GET api/<PlatfromsController>/5
-        [HttpGet("{id}")]
-        public Platform Get(int id)
+        [HttpGet("find")]
+        public IEnumerable<string> FindPlatforms([FromQuery] string location)
         {
-            return Storage.Platforms[id];
+            return Storage.Platforms
+                .Where(p => p.AllLocsForPlatform.Contains(location))
+                .Select(p => p.Name)
+                .ToList();
         }
 
-        // POST api/<PlatfromsController>
         [HttpPost]
         public void Post()
         {
@@ -32,11 +32,29 @@ namespace AdPlatform.Controllers
                 string? line;
                 while((line = reader.ReadLine()) != null)
                 {
-                    Console.WriteLine(line);
                     string[] words = line.Split(':');
-                    Storage.Platforms.Add(new Platform() { Name = words[0], Location = words[1] });
+                    string[] locs = words[1].Split(",");
+
+                    Platform platform = new Platform() { Name = words[0]};
+                    foreach(string i in locs)
+                    {
+                        platform.Locations.Add(i);
+                    }
+                    Storage.Platforms.Add(platform);
                 }
 
+                var allLocations = Storage.Platforms.SelectMany(p => p.Locations).Distinct().ToList();
+
+                foreach (var p in Storage.Platforms)
+                {
+                    foreach (var loc in allLocations)
+                    {
+                        if (p.Locations.Any(a => loc.StartsWith(a)))
+                        {
+                            p.AllLocsForPlatform.Add(loc);
+                        }
+                    }
+                }
             }
         }
     }
