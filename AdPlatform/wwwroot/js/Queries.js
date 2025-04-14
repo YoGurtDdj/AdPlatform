@@ -17,33 +17,34 @@ function findPlatforms() {
                 alert("Ничего не найдено");
             }
         })
-        .catch(error => console.error('Платформы не найдены', error));
+        .catch(error => alert ('Платформы не найдены', error));
 }
 
 
-function addItem() {
+async function addItem() {
     const path = document.getElementById('path').value.trim();
-    
-    fetch(uri, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ path: path })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Ошибка на сервере');
-            }
-            return response.json();
-        })
-        .then(data => {
-            setTimeout(() => {
-                alert('Данные загружены');
-            }, 0);
-        })
-        .catch(error => console.error('Не получилось загрузить данные.', error));
+
+    try {
+        const response = await fetch(uri, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ path: path })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        const data = await response.json();
+        alert(data.message); 
+    } catch (error) {
+        alert("Ошибка: " + error.message);
+    }
 }
+
 
 
 

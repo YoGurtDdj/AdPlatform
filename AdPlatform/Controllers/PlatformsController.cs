@@ -1,6 +1,7 @@
 ﻿using AdPlatform.Data;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.IO;
 
 namespace AdPlatform.Controllers
 {
@@ -30,9 +31,9 @@ namespace AdPlatform.Controllers
             {
                 path.Path = "input.txt";
             }
-            if (!System.IO.File.Exists(path.Path))
+            else if (!System.IO.File.Exists(path.Path))
             {
-                return NotFound("Файл не найден");
+                return NotFound("Файл не найден: " + path.Path);
             }
 
             Storage.Platforms.Clear();
@@ -44,8 +45,19 @@ namespace AdPlatform.Controllers
                     string? line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        string[] words = line.Split(':');
-                        string[] locs = words[1].Split(",");
+                        if (!line.Contains(':')) continue;
+                        string[] words = line.Split(':', 2);
+                        if (words.Length != 2 || string.IsNullOrWhiteSpace(words[0]) || string.IsNullOrWhiteSpace(words[1]))
+                        {
+                            return BadRequest($"Неверный формат строки: '{line}'");
+                        }
+
+                        string[] locs = words[1].Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                        if (locs.Length == 0)
+                        {
+                            return BadRequest($"Платформа '{words[0]}' не содержит локаций.");
+                        }
 
                         Platform platform = new Platform() { Name = words[0] };
                         foreach (string i in locs)
@@ -58,7 +70,7 @@ namespace AdPlatform.Controllers
             }
             catch(Exception ex)
             {
-                return StatusCode(500, "Ошибка при чтении файла" + ex);
+                return BadRequest("Ошибка при чтении файла" + ex);
             }
 
 
