@@ -4,11 +4,13 @@
     <meta charset="utf-8" />
     <title>AdPlatforms</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
     <div class="header">
         <h1>AdPlatforms</h1>
         <form action="javascript:void(0);" method="POST" onsubmit="addItem()">
+            <input type="text" placeholder="Path" id="path" />
             <input type="submit" value="Загрузить данные из файла" />
         </form>
     </div>
@@ -16,11 +18,11 @@
         <div class="search">
             <div class="search-container">
                 <input type="text" id="searchBox" class="search-box" placeholder="Введите запрос..." />
-                <button onclick="findPlatforms()">Найти</button>
+                <button class="search-but" onclick="findPlatforms()"><img class="search-img" src="search.png"/></button>
             </div>
         </div>
 
-        <div class="table">
+        <div id="table" class="table">
             <table>
                 <thead>
                     <tr>

@@ -24,38 +24,58 @@ namespace AdPlatform.Controllers
         }
 
         [HttpPost]
-        public void Post()
+        public IActionResult Post([FromBody] FilePath path)
         {
-            Storage.Platforms.Clear();
-            using (StreamReader reader = new StreamReader("input.txt"))
+            if (string.IsNullOrEmpty(path.Path))
             {
-                string? line;
-                while((line = reader.ReadLine()) != null)
+                path.Path = "input.txt";
+            }
+            if (!System.IO.File.Exists(path.Path))
+            {
+                return NotFound("Файл не найден");
+            }
+
+            Storage.Platforms.Clear();
+
+            try
+            {
+                using (StreamReader reader = new StreamReader(path.Path))
                 {
-                    string[] words = line.Split(':');
-                    string[] locs = words[1].Split(",");
-
-                    Platform platform = new Platform() { Name = words[0]};
-                    foreach(string i in locs)
+                    string? line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        platform.Locations.Add(i);
-                    }
-                    Storage.Platforms.Add(platform);
-                }
+                        string[] words = line.Split(':');
+                        string[] locs = words[1].Split(",");
 
-                var allLocations = Storage.Platforms.SelectMany(p => p.Locations).Distinct().ToList();
-
-                foreach (var p in Storage.Platforms)
-                {
-                    foreach (var loc in allLocations)
-                    {
-                        if (p.Locations.Any(a => loc.StartsWith(a)))
+                        Platform platform = new Platform() { Name = words[0] };
+                        foreach (string i in locs)
                         {
-                            p.AllLocsForPlatform.Add(loc);
+                            platform.Locations.Add(i);
                         }
+                        Storage.Platforms.Add(platform);
                     }
                 }
             }
+            catch(Exception ex)
+            {
+                return StatusCode(500, "Ошибка при чтении файла" + ex);
+            }
+
+
+            var allLocations = Storage.Platforms.SelectMany(p => p.Locations).Distinct().ToList();
+
+            foreach (var p in Storage.Platforms)
+            {
+                foreach (var loc in allLocations)
+                {
+                    if (p.Locations.Any(a => loc.StartsWith(a)))
+                    {
+                        p.AllLocsForPlatform.Add(loc);
+                    }
+                }
+            }
+
+            return Ok(new { message = "Данные загружены" });
         }
     }
 }

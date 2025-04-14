@@ -7,20 +7,44 @@ function findPlatforms() {
 
     fetch(`${uri}/find?location=${encodeURIComponent(location)}`)
         .then(response => response.json())
-        .then(data => _displayItems(data))
-        .catch(error => console.error('Unable to find platforms.', error));
+        .then(data => {
+            const table = document.getElementById('table');
+            if (data.length != 0) {
+                table.style.visibility = 'visible';
+                _displayItems(data);
+            }
+            else {
+                alert("Ничего не найдено");
+            }
+        })
+        .catch(error => console.error('Платформы не найдены', error));
 }
 
+
 function addItem() {
+    const path = document.getElementById('path').value.trim();
+    
     fetch(uri, {
         method: 'POST',
         headers: {
-            'Accept': 'application/json',
             'Content-Type': 'application/json'
-        }})
-        .then(response => response.json())
-        .catch(error => console.error('Unable to add item.', error));
+        },
+        body: JSON.stringify({ path: path })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка на сервере');
+            }
+            return response.json();
+        })
+        .then(data => {
+            setTimeout(() => {
+                alert('Данные загружены');
+            }, 0);
+        })
+        .catch(error => console.error('Не получилось загрузить данные.', error));
 }
+
 
 
 function _displayItems(data) {
